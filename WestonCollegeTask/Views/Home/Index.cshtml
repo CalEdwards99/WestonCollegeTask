@@ -1,10 +1,218 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
 }
+@model List<CategoryCount>
+
+<h1>Weston College Task</h1>
+<form id="searchForm" method="get" asp-controller="Home" asp-action="SearchPoliceData" onsubmit="return validateForm()">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="form-group">
+                <label class="col-form-label">Latitude</label>
+                <input type="text" class="form-control required" id="lat" name="lat">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label class="col-form-label">Longitude</label>
+                <input type="text" class="form-control required" id="lng" name="lng">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label class="col-form-label">Month</label>
+                <input type="month" class="form-control required" id="date" name="date">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label class="col-form-label">&nbsp;</label>
+                <button class="btn btn-primary form-control">Search</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+@{
+    if (Model != null)
+    {
+        if (Model.Count == 0)
+        {
+            <h6>No results to display, try changing search parameters</h6>
+        }
+
+        else if (Model.Count > 0)
+        {
+
+            <table id="myTable" class="table table-sm table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">
+                            <div class="d-inline mr-2">Crime-Category</div>
+                            <div class="dropdown d-inline">
+                                <button class="btn btn-primary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Sort
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    <a class="dropdown-item" onclick="sortTableAZ()">A-Z</a>
+                                    <a class="dropdown-item" onclick="sortTableZA()">Z-A</a>
+                                </div>
+                            </div>
+                        </th>
+                        <th scope="col">
+                            <div class="d-inline mr-2">Incident Count</div>
+                            <div class="dropdown d-inline">
+                                <button class="btn btn-primary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Sort
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    <a class="dropdown-item" onclick="sortTableHighLow()">Highest-Lowest</a>
+                                    <a class="dropdown-item" onclick="sortTableLowHigh()">Lowest-Highest</a>
+                                </div>
+                            </div>
+                        </th>
+                    </tr>
+                    @{ if (Model != null)
+                        {
+                            foreach (var categoryCount in Model)
+                            {
+                                <tr>
+                                    <td>@categoryCount.category</td>
+                                    <td>@categoryCount.count</td>
+                                </tr>
+                            }
+                        }
+                    }
+            </table>
+
+        }
+    }
+    if (Model == null)
+    {
+        <h6>Search Police Data to discover crimes commited in your area </h6>
+    }
+}
+
+<script>
+    let highToLow = true;
+    let AtoZ = true;
+    let sortAlphabetically = false; //default to false, switch to true when called to change ordering to alphabetical
+
+    function sortTableHighLow() {
+        highToLow = true;
+        sortAlphabetically = false;
+        sortTable()
+    }
+
+    function sortTableLowHigh() {
+        highToLow = false;
+        sortAlphabetically = false;
+        sortTable()
+    }
+
+    function sortTableAZ() {
+        sortAlphabetically = true;
+        AtoZ = true;
+        sortTable();
+    }
+
+    function sortTableZA() {
+        sortAlphabetically = true;
+        AtoZ = false;
+        sortTable();
+    }
+
+    function sortTable() {
+
+        var table, rows, switching, i, x, y, shouldSwitch;
+        table = document.getElementById("myTable");
+        switching = true;
+        /*Make a loop that will continue until
+        no switching has been done:*/
+        while (switching) {
+            //start by saying: no switching is done:
+            switching = false;
+            rows = table.rows;
+            /*Loop through all table rows (except the
+            first, which contains table headers):*/
+            for (i = 1; i < (rows.length - 1); i++) {
+                //start by saying there should be no switching:
+                shouldSwitch = false;
+
+                /*Get the two elements you want to compare,
+                one from current row and one from the next:*/
+                x = rows[i].getElementsByTagName("TD")[1];
+                y = rows[i + 1].getElementsByTagName("TD")[1];
+
+                if (sortAlphabetically == true) { //change the x and y as the TD's we're comparing have changed.
+                    //console.log("sorting alphabetically");
+                    x = rows[i].getElementsByTagName("TD")[0];
+                    y = rows[i + 1].getElementsByTagName("TD")[0];
+
+                    //check if the two rows should switch place:
+                    //this one sorts A-Z
+                    if (AtoZ == true) {
+                        console.log("Sort Alphabetically, A-Z")
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+
+                    //this one sorts Z-A
+                    if (AtoZ == false) {
+                        console.log("Sort Alphabetically, Z-A")
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                            //if so, mark as a switch and break the loop:
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+
+                }
 
 
 
-@*<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>*@
+                //check if the two rows should switch place:
+                //check if numbers are being ordered high to low
+                if (highToLow == true) {
+                    console.log("Sort Numerically, highest to lowest")
+                    if (Number(x.innerHTML) < Number(y.innerHTML)) {
+                        //if so, mark as a switch and break the loop:
+                        shouldSwitch = true;
+                        break;
+                    }
+                }
+                if (highToLow == false) {
+                    console.log("Sort Numerically, lowest to highest")
+                    if (Number(x.innerHTML) > Number(y.innerHTML)) {
+                        //if so, mark as a switch and break the loop:
+                        shouldSwitch = true;
+                        break;
+                    }
+                }
+
+            }
+            if (shouldSwitch) {
+                /*If a switch has been marked, make the switch
+                and mark that a switch has been done:*/
+                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                switching = true;
+            }
+        }
+    }
+</script>
+
+<script>
+    function validateForm() {
+        let x = document.forms["searchForm"]["lat"].value;
+        let y = document.forms["searchForm"]["lng"].value;
+        let z = document.forms["searchForm"]["date"].value;
+        if (x == "" || y == "" || z == "") {
+
+            alert("All fields must be filled");
+            return false;
+        }
+    }
+</script>
